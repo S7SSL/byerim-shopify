@@ -1,17 +1,22 @@
 {%- comment -%}
-  ByErim — Google Base Tag (gtag.js)
-  Place this snippet in <head> via layout/theme.liquid
-  Loads Google Ads (AW-10862797813) and GA4 (G-63ZHP1ZZ6P)
+  ByErim — Google Base Tag
+  Replaces the existing hardcoded gtag snippet in the theme.
+  Add via {% render 'google-base-tag' %} in <head> of layout/theme.liquid.
+
+  Enables:
+    - Google Ads conversion tracking (AW-10862797813)
+    - GA4 analytics (G-63ZHP1ZZ6P)
+    - Enhanced conversions (allow_enhanced_conversions: true)
 {%- endcomment -%}
 
-<!-- Google tag (gtag.js) -->
+<!-- Google tag (gtag.js) - ByErim -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=AW-10862797813"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
-  // Google Ads
+  // Google Ads — enhanced conversions enabled
   gtag('config', 'AW-10862797813', {
     'allow_enhanced_conversions': true
   });

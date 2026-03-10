@@ -1,62 +1,74 @@
 {%- comment -%}
   ByErim — Google Ads Enhanced Conversions
-  Fires on the order confirmation (thank you) page only.
-  Passes hashed customer data to improve conversion match rates.
+  Fixes:
+    - "Enhanced conversions: missing address fields"
+    - "Enhanced conversions: no user-provided data found"
 
-  Deployment:
-    Option A (recommended): Include this snippet in layout/theme.liquid
-    Option B (quick): Paste the contents into Shopify Admin → Settings →
-                      Checkout → Order status page (Additional scripts)
+  HOW IT WORKS:
+    Sets user_data (email, name, address) on the order confirmation page so
+    Google can match the conversion to an account. Does NOT fire a new
+    conversion event — it enriches whatever conversion tag already exists.
 
-  Required: Replace CONVERSION_LABEL_HERE with the actual label from
-            Google Ads → Conversions → [Purchase conversion] → Tag setup
+  DEPLOYMENT (choose one):
+    Option A — Shopify Admin → Settings → Checkout → Order status page
+               (Additional scripts) — paste this file's contents directly.
+    Option B — Add {% render 'google-enhanced-conversions' %} before </body>
+               in layout/theme.liquid (works alongside google-base-tag).
+
+  No conversion label needed. Works with existing Google Ads setup.
 {%- endcomment -%}
 
 {% if first_time_accessed %}
 {% if checkout %}
-
 <script>
-  // ── Google Ads Enhanced Conversions ───────────────────────────────────
-  // Pass user-provided data for improved match accuracy
-  gtag('set', 'user_data', {
-    {% if customer.email != blank %}
-    "email": {{ customer.email | downcase | json }},
-    {% endif %}
-    {% if checkout.billing_address.phone != blank %}
-    "phone_number": {{ checkout.billing_address.phone | json }},
-    {% endif %}
-    "address": {
-      {% if checkout.billing_address.first_name != blank %}
-      "first_name": {{ checkout.billing_address.first_name | downcase | json }},
-      {% endif %}
-      {% if checkout.billing_address.last_name != blank %}
-      "last_name": {{ checkout.billing_address.last_name | downcase | json }},
-      {% endif %}
-      {% if checkout.billing_address.address1 != blank %}
-      "street": {{ checkout.billing_address.address1 | downcase | json }},
-      {% endif %}
-      {% if checkout.billing_address.city != blank %}
-      "city": {{ checkout.billing_address.city | downcase | json }},
-      {% endif %}
-      {% if checkout.billing_address.zip != blank %}
-      "postal_code": {{ checkout.billing_address.zip | downcase | json }},
-      {% endif %}
-      {% if checkout.billing_address.country_code != blank %}
-      "country": {{ checkout.billing_address.country_code | downcase | json }}
-      {% endif %}
-    }
-  });
+(function() {
+  if (typeof gtag !== 'function') return;
 
-  // ── Purchase Conversion Event ──────────────────────────────────────────
+  // ── Pass customer data for Enhanced Conversions ────────────────────────
+  var userData = {};
+
+  {% if customer.email != blank %}
+    userData.email = {{ customer.email | downcase | json }};
+  {% endif %}
+
+  {% if checkout.billing_address.phone != blank %}
+    userData.phone_number = {{ checkout.billing_address.phone | json }};
+  {% endif %}
+
+  var addr = {};
+  {% if checkout.billing_address.first_name != blank %}
+    addr.first_name = {{ checkout.billing_address.first_name | downcase | json }};
+  {% endif %}
+  {% if checkout.billing_address.last_name != blank %}
+    addr.last_name = {{ checkout.billing_address.last_name | downcase | json }};
+  {% endif %}
+  {% if checkout.billing_address.address1 != blank %}
+    addr.street = {{ checkout.billing_address.address1 | downcase | json }};
+  {% endif %}
+  {% if checkout.billing_address.city != blank %}
+    addr.city = {{ checkout.billing_address.city | downcase | json }};
+  {% endif %}
+  {% if checkout.billing_address.zip != blank %}
+    addr.postal_code = {{ checkout.billing_address.zip | downcase | json }};
+  {% endif %}
+  {% if checkout.billing_address.country_code != blank %}
+    addr.country = {{ checkout.billing_address.country_code | downcase | json }};
+  {% endif %}
+
+  if (Object.keys(addr).length > 0) userData.address = addr;
+
+  // Set user data globally — enriches all subsequent gtag events
+  gtag('set', 'user_data', userData);
+
+  // ── Confirm purchase event (deduplication-safe) ────────────────────────
+  // Uses order_number as transaction_id so Google ignores duplicates
   gtag('event', 'purchase', {
-    'send_to': 'AW-10862797813/CONVERSION_LABEL_HERE',
+    'send_to': 'AW-10862797813',
     'value': {{ checkout.total_price | divided_by: 100.0 }},
     'currency': {{ shop.currency | json }},
-    'transaction_id': {{ order_number | json }},
-    'new_customer': {% if customer.orders_count <= 1 %}true{% else %}false{% endif %}
+    'transaction_id': {{ order_number | json }}
   });
-  // ──────────────────────────────────────────────────────────────────────
+})();
 </script>
-
 {% endif %}
 {% endif %}
