@@ -1,0 +1,21 @@
+{%- comment -%}
+  ByErim — Google Base Tag (gtag.js)
+  Place this snippet in <head> via layout/theme.liquid
+  Loads Google Ads (AW-10862797813) and GA4 (G-63ZHP1ZZ6P)
+{%- endcomment -%}
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-10862797813"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  // Google Ads
+  gtag('config', 'AW-10862797813', {
+    'allow_enhanced_conversions': true
+  });
+
+  // GA4
+  gtag('config', 'G-63ZHP1ZZ6P');
+</script>
