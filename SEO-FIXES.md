@@ -8,10 +8,14 @@
 
 **Problem:** `/collections/hair-oil` has canonical pointing to the product page. Google won't rank the collection.
 
-**Fix:** In `theme.liquid`, replace the existing `<link rel="canonical">` tag with:
+**Fix:** In `theme.liquid`:
+1. Find the existing `<link rel="canonical" ...>` tag and **DELETE IT** entirely
+2. In its place, add:
 ```liquid
 {% render 'seo-canonical-fix' %}
 ```
+⚠️ Do NOT leave both — two canonical tags means Google ignores both.
+
 Snippet file: `snippets/seo-canonical-fix.liquid` ✅
 
 ---
@@ -20,11 +24,14 @@ Snippet file: `snippets/seo-canonical-fix.liquid` ✅
 
 **Problem:** Homepage H1 reads "Stories from our Community" — Google thinks the page is about community stories.
 
-**Fix:** In the homepage hero section (likely `sections/main-homepage.liquid` or similar), add this at the very top:
+**Fix:** In the homepage hero section (likely `sections/main-homepage.liquid` or similar):
+1. Add this at the very top of the section:
 ```liquid
 {% render 'seo-homepage-h1' %}
 ```
-Then change the existing H1 tag to H2.
+2. Find the existing `<h1>` tag(s) on the homepage and change them to `<h2>`
+
+⚠️ A page should have exactly ONE H1. Adding this without demoting the existing H1 will hurt rankings.
 
 Snippet file: `snippets/seo-homepage-h1.liquid` ✅
 
