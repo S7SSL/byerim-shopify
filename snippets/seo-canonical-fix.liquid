@@ -1,0 +1,39 @@
+{% comment %}
+  SEO Canonical Fix — ByErim
+  
+  PURPOSE:
+  Ensures every page type outputs the correct self-referencing canonical URL.
+  Fixes the bug where /collections/hair-oil canonicalises to the product page
+  instead of itself, which blocks Google from ranking the collection.
+
+  INSTALL:
+  1. In theme.liquid, find the existing <link rel="canonical"> tag (usually near
+     the <head> closing area) and REPLACE it with:
+       {% render 'seo-canonical-fix' %}
+  
+  2. If no canonical tag exists, add the render tag inside <head>.
+{% endcomment %}
+
+{%- assign canonical_url = canonical_url | default: request.origin | append: request.path -%}
+
+{%- if template.name == 'collection' -%}
+  {%- assign canonical_url = shop.url | append: collection.url -%}
+
+{%- elsif template.name == 'product' -%}
+  {%- assign canonical_url = shop.url | append: product.url -%}
+
+{%- elsif template.name == 'article' -%}
+  {%- assign canonical_url = shop.url | append: article.url -%}
+
+{%- elsif template.name == 'blog' -%}
+  {%- assign canonical_url = shop.url | append: blog.url -%}
+
+{%- elsif template.name == 'page' -%}
+  {%- assign canonical_url = shop.url | append: page.url -%}
+
+{%- elsif template.name == 'index' -%}
+  {%- assign canonical_url = shop.url -%}
+
+{%- endif -%}
+
+<link rel="canonical" href="{{ canonical_url }}">

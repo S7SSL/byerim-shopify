@@ -1,0 +1,38 @@
+{% comment %}
+  SEO Homepage H1 Fix — ByErim
+
+  PURPOSE:
+  The current homepage H1 reads "Stories from our Community" which tells Google
+  the page is about community stories, not hair oil. This snippet adds a proper
+  SEO-optimised H1 that is visually styled to match the brand but readable by
+  Google as the primary topic.
+
+  INSTALL:
+  In the homepage template (templates/index.json or sections/hero.liquid),
+  add this snippet at the very top of the hero/banner section — BEFORE the
+  current first heading.
+
+  The <h1> below replaces whatever is currently the first H1 on the page.
+  The existing "Stories from our Community" heading should be demoted to <h2>.
+{% endcomment %}
+
+<h1 class="seo-h1 visually-prominent">
+  Natural Ayurvedic Hair Oil &amp; Award-Winning Hair Care | ByErim
+</h1>
+
+{% comment %}
+  Optional: if the brand wants this visually hidden but still crawlable,
+  wrap in a sr-only class. But ideally keep it visible — it reinforces the brand.
+  
+  Suggested CSS (add to base.css or theme.css):
+  
+  .seo-h1 {
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 700;
+    text-align: center;
+    color: var(--color-foreground);
+    margin: 0 auto 1.5rem;
+    max-width: 800px;
+    padding: 0 1rem;
+  }
+{% endcomment %}
