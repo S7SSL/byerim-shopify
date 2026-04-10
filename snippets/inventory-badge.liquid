@@ -1,0 +1,104 @@
+{% comment %}
+  Live Inventory Badge — Fetches current stock from Netlify API
+  Usage: {% render 'inventory-badge' with product: product %}
+
+  Displays:
+  - Green "In Stock" if > 20 units
+  - Orange "Low Stock (X left)" if 1-20 units
+  - Red "Out of Stock" if 0 units
+
+  Auto-refreshes every 5 minutes
+{% endcomment %}
+
+<div id="inventory-badge-{{ product.handle }}" class="inventory-badge loading" data-product-handle="{{ product.handle }}">
+  <span id="inventory-text-{{ product.handle }}">Checking stock...</span>
+</div>
+
+<style>
+  .inventory-badge {
+    padding: 12px 16px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 14px;
+    margin: 16px 0;
+    text-align: center;
+  }
+
+  .inventory-badge.in-stock {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #66bb6a;
+  }
+
+  .inventory-badge.low-stock {
+    background-color: #fff3e0;
+    color: #e65100;
+    border: 1px solid #ffb74d;
+  }
+
+  .inventory-badge.out-of-stock {
+    background-color: #ffebee;
+    color: #b71c1c;
+    border: 1px solid #ef5350;
+  }
+
+  .inventory-badge.loading {
+    background-color: #f5f5f5;
+    color: #666;
+    border: 1px solid #e0e0e0;
+  }
+</style>
+
+<script>
+  (function() {
+    var DASHBOARD_API = 'https://byerim.netlify.app/.netlify/functions/shopify-proxy';
+    var PRODUCT_HANDLE = '{{ product.handle }}';
+    var textEl = document.getElementById('inventory-text-' + PRODUCT_HANDLE);
+    var badgeEl = document.getElementById('inventory-badge-' + PRODUCT_HANDLE);
+
+    function updateBadge(className, text) {
+      badgeEl.className = 'inventory-badge ' + className;
+      textEl.textContent = text;
+    }
+
+    function fetchInventory() {
+      fetch(DASHBOARD_API)
+        .then(function(response) {
+          if (!response.ok) throw new Error('API error');
+          return response.json();
+        })
+        .then(function(data) {
+          var products = data.products || [];
+          var product = products.find(function(p) { return p.handle === PRODUCT_HANDLE; });
+
+          if (!product) {
+            updateBadge('out-of-stock', 'Out of Stock');
+            return;
+          }
+
+          var totalStock = product.variants.reduce(function(sum, v) {
+            return sum + (v.inventory_quantity || 0);
+          }, 0);
+
+          if (totalStock === 0) {
+            updateBadge('out-of-stock', 'Out of Stock');
+          } else if (totalStock < 20) {
+            updateBadge('low-stock', 'Low Stock \u2014 ' + totalStock + ' left');
+          } else {
+            updateBadge('in-stock', 'In Stock');
+          }
+        })
+        .catch(function() {
+          updateBadge('loading', 'In Stock');
+        });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', fetchInventory);
+    } else {
+      fetchInventory();
+    }
+
+    setInterval(fetchInventory, 5 * 60 * 1000);
+  })();
+</script>
